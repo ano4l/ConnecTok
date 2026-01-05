@@ -240,9 +240,11 @@ export default function BuyerDashboard() {
             <div className="lg:col-span-2 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Featured Products</h2>
-                <Button variant="ghost" size="sm">
-                  View All
-                  <ChevronRight className="ml-1 h-4 w-4" />
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/explore">
+                    View All
+                    <ChevronRight className="ml-1 h-4 w-4" />
+                  </Link>
                 </Button>
               </div>
 

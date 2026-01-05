@@ -325,38 +325,54 @@ export default function ProductsPage() {
                 <div className="mt-3 pt-3 border-t space-y-3">
                   <div>
                     <p className="text-xs text-muted-foreground mb-2">Stock Adjustment</p>
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-3 gap-2 mb-2">
                       <Button 
                         size="sm" 
                         variant="outline"
                         onClick={() => handleStockAdjustment(product.id, -10)}
                       >
-                        <Minus className="h-4 w-4 mr-1" />
-                        -10
+                        <Minus className="h-3 w-3 mr-1" />
+                        10
                       </Button>
                       <Button 
                         size="sm" 
                         variant="outline"
-                        onClick={() => handleStockAdjustment(product.id, -50)}
+                        onClick={() => handleStockAdjustment(product.id, -5)}
                       >
-                        <Minus className="h-4 w-4 mr-1" />
-                        -50
+                        <Minus className="h-3 w-3 mr-1" />
+                        5
                       </Button>
                       <Button 
                         size="sm" 
                         variant="outline"
-                        onClick={() => handleStockAdjustment(product.id, 50)}
+                        onClick={() => handleStockAdjustment(product.id, -1)}
                       >
-                        <Plus className="h-4 w-4 mr-1" />
-                        +50
+                        <Minus className="h-3 w-3 mr-1" />
+                        1
                       </Button>
                       <Button 
                         size="sm" 
                         variant="outline"
-                        onClick={() => handleStockAdjustment(product.id, 100)}
+                        onClick={() => handleStockAdjustment(product.id, 1)}
                       >
-                        <Plus className="h-4 w-4 mr-1" />
-                        +100
+                        <Plus className="h-3 w-3 mr-1" />
+                        1
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleStockAdjustment(product.id, 5)}
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        5
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleStockAdjustment(product.id, 10)}
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        10
                       </Button>
                     </div>
                   </div>
