@@ -6,6 +6,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { AppHeader } from '@/components/layout/app-header'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { 
   Truck,
   Package,
@@ -19,7 +27,8 @@ import {
   Phone,
   ChevronRight,
   ArrowLeft,
-  Navigation
+  Navigation,
+  AlertCircle
 } from 'lucide-react'
 
 interface Delivery {
@@ -36,8 +45,10 @@ interface Delivery {
 
 export default function DeliveriesPage() {
   const [filter, setFilter] = useState<string>('all')
-
-  const deliveries: Delivery[] = [
+  const [expandedDelivery, setExpandedDelivery] = useState<string | null>(null)
+  const [showStatusDialog, setShowStatusDialog] = useState(false)
+  const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null)
+  const [deliveries, setDeliveries] = useState<Delivery[]>([
     {
       id: 'DEL-001',
       orderId: 'ORD-2024-001',
@@ -82,7 +93,41 @@ export default function DeliveriesPage() {
       scheduledDate: '2024-01-13',
       phone: '+263 774 567 890'
     }
-  ]
+  ])
+
+  const handleStatusUpdate = (delivery: Delivery, newStatus: Delivery['status']) => {
+    setDeliveries(deliveries.map(d => 
+      d.id === delivery.id ? { ...d, status: newStatus } : d
+    ))
+    setShowStatusDialog(false)
+    setSelectedDelivery(null)
+  }
+
+  const getNextStatus = (currentStatus: Delivery['status']): Delivery['status'] | null => {
+    switch (currentStatus) {
+      case 'pending':
+        return 'picked-up'
+      case 'picked-up':
+        return 'in-transit'
+      case 'in-transit':
+        return 'delivered'
+      default:
+        return null
+    }
+  }
+
+  const getStatusAction = (status: Delivery['status']) => {
+    switch (status) {
+      case 'pending':
+        return 'Start Delivery'
+      case 'picked-up':
+        return 'Mark In Transit'
+      case 'in-transit':
+        return 'Mark Delivered'
+      default:
+        return null
+    }
+  }
 
   const getStatusBadge = (status: Delivery['status']) => {
     switch (status) {
@@ -182,38 +227,145 @@ export default function DeliveriesPage() {
 
               {/* Action Buttons */}
               <div className="flex gap-2">
-                {delivery.status === 'pending' && (
-                  <Button size="sm" className="flex-1">
-                    <Truck className="mr-2 h-4 w-4" />
-                    Start Delivery
+                {getStatusAction(delivery.status) && (
+                  <Button 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => {
+                      const nextStatus = getNextStatus(delivery.status)
+                      if (nextStatus) {
+                        setSelectedDelivery(delivery)
+                        setShowStatusDialog(true)
+                      }
+                    }}
+                  >
+                    {getStatusAction(delivery.status)}
                   </Button>
                 )}
-                {delivery.status === 'picked-up' && (
-                  <Button size="sm" className="flex-1">
-                    <Navigation className="mr-2 h-4 w-4" />
-                    Mark In Transit
-                  </Button>
-                )}
-                {delivery.status === 'in-transit' && (
-                  <Button size="sm" className="flex-1 bg-green-600 hover:bg-green-700">
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    Mark Delivered
-                  </Button>
-                )}
-                {delivery.status === 'delivered' && (
-                  <Button size="sm" variant="outline" className="flex-1" disabled>
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    Completed
-                  </Button>
-                )}
-                <Button size="sm" variant="outline">
-                  <Phone className="h-4 w-4" />
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setExpandedDelivery(expandedDelivery === delivery.id ? null : delivery.id)}
+                >
+                  <ChevronRight className={`mr-2 h-4 w-4 transition-transform ${expandedDelivery === delivery.id ? 'rotate-90' : ''}`} />
+                  Details
                 </Button>
               </div>
+
+              {/* Expanded Details */}
+              {expandedDelivery === delivery.id && (
+                <div className="mt-4 pt-4 border-t space-y-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2">Customer Contact</p>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" className="flex-1">
+                        <Phone className="mr-2 h-4 w-4" />
+                        Call Customer
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1">
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Message
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-start gap-2 mb-2">
+                      <Phone className="h-4 w-4 text-muted-foreground mt-0.5" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Phone Number</p>
+                        <p className="text-sm font-medium">{delivery.phone}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Delivery Address</p>
+                        <p className="text-sm font-medium">{delivery.address}</p>
+                      </div>
+                    </div>
+                  </div>
+                  {delivery.status !== 'delivered' && (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => {
+                        setSelectedDelivery(delivery)
+                        setShowStatusDialog(true)
+                      }}
+                    >
+                      <Navigation className="mr-2 h-4 w-4" />
+                      Update Status
+                    </Button>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {/* Status Update Dialog */}
+      <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Update Delivery Status</DialogTitle>
+            <DialogDescription>
+              Update the status for {selectedDelivery?.customer}'s delivery
+            </DialogDescription>
+          </DialogHeader>
+          {selectedDelivery && (
+            <div className="space-y-4">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <p className="text-sm font-medium mb-1">{selectedDelivery.product}</p>
+                <p className="text-xs text-muted-foreground">{selectedDelivery.orderId}</p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Current Status:</p>
+                {getStatusBadge(selectedDelivery.status)}
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Update to:</p>
+                <div className="flex flex-col gap-2">
+                  {selectedDelivery.status === 'pending' && (
+                    <Button 
+                      onClick={() => handleStatusUpdate(selectedDelivery, 'picked-up')}
+                      className="w-full justify-start"
+                    >
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Mark as Picked Up
+                    </Button>
+                  )}
+                  {selectedDelivery.status === 'picked-up' && (
+                    <Button 
+                      onClick={() => handleStatusUpdate(selectedDelivery, 'in-transit')}
+                      className="w-full justify-start"
+                    >
+                      <Truck className="mr-2 h-4 w-4" />
+                      Mark as In Transit
+                    </Button>
+                  )}
+                  {selectedDelivery.status === 'in-transit' && (
+                    <Button 
+                      onClick={() => handleStatusUpdate(selectedDelivery, 'delivered')}
+                      className="w-full justify-start"
+                    >
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Mark as Delivered
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStatusDialog(false)}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t safe-area-pb">
