@@ -35,14 +35,55 @@ interface Transaction {
 
 export default function IncomePage() {
   const [period, setPeriod] = useState<string>('month')
+  const [expandedTransaction, setExpandedTransaction] = useState<string | null>(null)
 
-  const stats = {
-    totalIncome: 12450,
-    pendingPayouts: 2340,
-    thisMonth: 4520,
-    lastMonth: 3890,
-    growth: 16.2
+  // Different stats based on selected period
+  const getStatsForPeriod = () => {
+    switch (period) {
+      case 'week':
+        return {
+          totalIncome: 2850,
+          pendingPayouts: 340,
+          thisMonth: 2850,
+          lastMonth: 2450,
+          growth: 16.3
+        }
+      case 'month':
+        return {
+          totalIncome: 12450,
+          pendingPayouts: 2340,
+          thisMonth: 12450,
+          lastMonth: 10890,
+          growth: 14.3
+        }
+      case 'quarter':
+        return {
+          totalIncome: 35200,
+          pendingPayouts: 4500,
+          thisMonth: 35200,
+          lastMonth: 29800,
+          growth: 18.1
+        }
+      case 'year':
+        return {
+          totalIncome: 148900,
+          pendingPayouts: 12300,
+          thisMonth: 148900,
+          lastMonth: 125600,
+          growth: 18.6
+        }
+      default:
+        return {
+          totalIncome: 12450,
+          pendingPayouts: 2340,
+          thisMonth: 12450,
+          lastMonth: 10890,
+          growth: 14.3
+        }
+    }
   }
+
+  const stats = getStatsForPeriod()
 
   const transactions: Transaction[] = [
     {
@@ -177,18 +218,18 @@ export default function IncomePage() {
         <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
           <CardContent className="pt-6">
             <div className="text-center mb-4">
-              <p className="text-sm opacity-80 mb-1">Total Income</p>
+              <p className="text-sm opacity-80 mb-1">Total Income ({period === 'week' ? 'This Week' : period === 'month' ? 'This Month' : period === 'quarter' ? 'This Quarter' : 'This Year'})</p>
               <p className="text-4xl font-bold">${stats.totalIncome.toLocaleString()}</p>
               <div className="flex items-center justify-center gap-1 mt-2">
                 <ArrowUpRight className="h-4 w-4 text-green-300" />
-                <span className="text-sm text-green-300">+{stats.growth}% from last month</span>
+                <span className="text-sm text-green-300">+{stats.growth}% from last period</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-primary-foreground/20">
               <div className="text-center">
                 <p className="text-2xl font-semibold">${stats.thisMonth.toLocaleString()}</p>
-                <p className="text-xs opacity-80">This Month</p>
+                <p className="text-xs opacity-80">Current Period</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-semibold">${stats.pendingPayouts.toLocaleString()}</p>
