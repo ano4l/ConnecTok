@@ -39,6 +39,10 @@ export default function SavedItemsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  const handleRemoveItem = (itemId: string) => {
+    setSavedItems(savedItems.filter(item => item.id !== itemId))
+  }
+
   const [savedItems, setSavedItems] = useState<SavedItem[]>([
     {
       id: '1',
@@ -223,7 +227,7 @@ export default function SavedItemsPage() {
                             variant="ghost" 
                             size="icon" 
                             className="h-8 w-8 text-destructive"
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => handleRemoveItem(item.id)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
