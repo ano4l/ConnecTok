@@ -294,9 +294,11 @@ export default function OrdersPage() {
                               Reorder
                             </Button>
                           )}
-                          <Button variant="ghost" size="sm">
-                            <MessageSquare className="mr-1 h-3 w-3" />
-                            Contact
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href="/messages">
+                              <MessageSquare className="mr-1 h-3 w-3" />
+                              Contact
+                            </Link>
                           </Button>
                         </div>
                       </div>

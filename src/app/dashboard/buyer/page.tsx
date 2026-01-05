@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { AppHeader } from '@/components/layout/app-header'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { 
   Search, 
   ShoppingCart, 
@@ -25,6 +28,10 @@ export default function BuyerDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [orderDialogOpen, setOrderDialogOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<any>(null)
+  const [orderQuantity, setOrderQuantity] = useState('')
+  const [deliveryAddress, setDeliveryAddress] = useState('')
 
   const categories = [
     { id: 'all', name: 'All', icon: Package },
@@ -284,6 +291,18 @@ export default function BuyerDashboard() {
                               {product.inStock ? 'In Stock' : 'Out of Stock'}
                             </Badge>
                           </div>
+                          <Button 
+                            className="w-full mt-3" 
+                            size="sm"
+                            disabled={!product.inStock}
+                            onClick={() => {
+                              setSelectedProduct(product)
+                              setOrderDialogOpen(true)
+                            }}
+                          >
+                            <ShoppingCart className="mr-2 h-4 w-4" />
+                            Order Now
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -327,8 +346,10 @@ export default function BuyerDashboard() {
                       <Separator />
                     </div>
                   ))}
-                  <Button variant="outline" className="w-full" size="sm">
-                    View All Orders
+                  <Button variant="outline" className="w-full" size="sm" asChild>
+                    <Link href="/orders">
+                      View All Orders
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -383,6 +404,77 @@ export default function BuyerDashboard() {
           </Link>
         </div>
       </nav>
+
+      {/* Order Now Dialog */}
+      <Dialog open={orderDialogOpen} onOpenChange={setOrderDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Place Order</DialogTitle>
+            <DialogDescription>
+              {selectedProduct && (
+                <span>Order {selectedProduct.name} from {selectedProduct.supplier}</span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="quantity">Quantity ({selectedProduct?.unit})</Label>
+              <Input
+                id="quantity"
+                type="number"
+                placeholder={`Min. ${selectedProduct?.minOrder || 1}`}
+                value={orderQuantity}
+                onChange={(e) => setOrderQuantity(e.target.value)}
+                min={selectedProduct?.minOrder || 1}
+              />
+              <p className="text-xs text-muted-foreground">
+                Minimum order: {selectedProduct?.minOrder} {selectedProduct?.unit}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">Delivery Address</Label>
+              <Input
+                id="address"
+                placeholder="Enter delivery address"
+                value={deliveryAddress}
+                onChange={(e) => setDeliveryAddress(e.target.value)}
+              />
+            </div>
+            {selectedProduct && orderQuantity && (
+              <div className="rounded-lg bg-muted p-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal:</span>
+                  <span className="font-semibold">
+                    ${(selectedProduct.price * parseFloat(orderQuantity || '0')).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOrderDialogOpen(false)
+                setOrderQuantity('')
+                setDeliveryAddress('')
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setOrderDialogOpen(false)
+                setOrderQuantity('')
+                setDeliveryAddress('')
+              }}
+              disabled={!orderQuantity || !deliveryAddress || parseFloat(orderQuantity) < (selectedProduct?.minOrder || 1)}
+            >
+              Confirm Order
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

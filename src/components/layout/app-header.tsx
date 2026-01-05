@@ -174,7 +174,7 @@ export function AppHeader({
             </Button>
 
             {showNotifications && (
-              <div className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg border bg-popover shadow-lg z-50">
+              <div className="absolute left-1/2 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg border bg-popover shadow-lg z-50">
                 <div className="p-4 border-b">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold">Notifications</h3>
@@ -280,8 +280,8 @@ export function AppHeader({
 
       {/* Mobile Menu Overlay */}
       {(internalMenuOpen || mobileMenuOpen) && (
-        <div className="fixed inset-0 top-14 bg-background/95 backdrop-blur-sm z-40 md:hidden border-t">
-          <div className="container py-4">
+        <div className="fixed inset-0 top-14 bg-background z-40 md:hidden border-t shadow-lg">
+          <div className="container py-4 bg-background">
             <nav className="space-y-2">
               {userRole === 'buyer' ? (
                 <>
