@@ -303,25 +303,32 @@ export default function MessagesPage() {
               </div>
 
               {/* Message Input */}
-              <div className="p-4 border-t">
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon">
+              <div className="p-3 md:p-4 border-t bg-background">
+                <div className="flex items-end gap-2">
+                  <Button variant="ghost" size="icon" className="h-10 w-10 flex-shrink-0">
                     <Paperclip className="h-5 w-5" />
                   </Button>
-                  <Button variant="ghost" size="icon">
-                    <ImageIcon className="h-5 w-5" />
-                  </Button>
-                  <Input
-                    placeholder="Type a message..."
-                    value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    className="flex-1"
-                  />
-                  <Button variant="ghost" size="icon">
-                    <Smile className="h-5 w-5" />
-                  </Button>
-                  <Button onClick={handleSendMessage} size="icon">
+                  <div className="flex-1 flex flex-col gap-2">
+                    <textarea
+                      placeholder="Type a message..."
+                      value={messageInput}
+                      onChange={(e) => setMessageInput(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault()
+                          handleSendMessage()
+                        }
+                      }}
+                      className="flex-1 min-h-[44px] max-h-32 px-4 py-3 text-base rounded-lg border border-input bg-background resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      rows={1}
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleSendMessage} 
+                    size="icon" 
+                    className="h-10 w-10 flex-shrink-0"
+                    disabled={!messageInput.trim()}
+                  >
                     <Send className="h-5 w-5" />
                   </Button>
                 </div>

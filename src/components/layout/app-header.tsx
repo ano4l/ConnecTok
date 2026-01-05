@@ -53,6 +53,7 @@ export function AppHeader({
   const [searchQuery, setSearchQuery] = useState('')
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [internalMenuOpen, setInternalMenuOpen] = useState(false)
 
   const notifications: Notification[] = [
     {
@@ -113,16 +114,20 @@ export function AppHeader({
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
-        {onMenuToggle && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden mr-2"
-            onClick={onMenuToggle}
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden mr-2"
+          onClick={() => {
+            if (onMenuToggle) {
+              onMenuToggle()
+            } else {
+              setInternalMenuOpen(!internalMenuOpen)
+            }
+          }}
+        >
+          {(mobileMenuOpen || internalMenuOpen) ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
         
         <Link href={dashboardLink} className="flex items-center space-x-2">
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
@@ -272,6 +277,102 @@ export function AppHeader({
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {(internalMenuOpen || mobileMenuOpen) && (
+        <div className="fixed inset-0 top-14 bg-background z-40 md:hidden">
+          <div className="container py-4">
+            <nav className="space-y-2">
+              {userRole === 'buyer' ? (
+                <>
+                  <Link href="/dashboard/buyer" onClick={() => setInternalMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-base h-12">
+                      <Package className="mr-3 h-5 w-5" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Link href="/explore" onClick={() => setInternalMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-base h-12">
+                      <Search className="mr-3 h-5 w-5" />
+                      Explore
+                    </Button>
+                  </Link>
+                  <Link href="/orders" onClick={() => setInternalMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-base h-12">
+                      <ShoppingCart className="mr-3 h-5 w-5" />
+                      Orders
+                    </Button>
+                  </Link>
+                  <Link href="/saved" onClick={() => setInternalMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-base h-12">
+                      <TrendingUp className="mr-3 h-5 w-5" />
+                      Saved Items
+                    </Button>
+                  </Link>
+                  <Link href="/messages" onClick={() => setInternalMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-base h-12">
+                      <MessageSquare className="mr-3 h-5 w-5" />
+                      Messages
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/dashboard/supplier" onClick={() => setInternalMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-base h-12">
+                      <Package className="mr-3 h-5 w-5" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard/supplier/deliveries" onClick={() => setInternalMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-base h-12">
+                      <TrendingUp className="mr-3 h-5 w-5" />
+                      Deliveries
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard/supplier/products" onClick={() => setInternalMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-base h-12">
+                      <Package className="mr-3 h-5 w-5" />
+                      Products
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard/supplier/income" onClick={() => setInternalMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-base h-12">
+                      <TrendingUp className="mr-3 h-5 w-5" />
+                      Income
+                    </Button>
+                  </Link>
+                  <Link href="/messages" onClick={() => setInternalMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-base h-12">
+                      <MessageSquare className="mr-3 h-5 w-5" />
+                      Messages
+                    </Button>
+                  </Link>
+                </>
+              )}
+              <div className="pt-4 border-t">
+                <Link href="/profile" onClick={() => setInternalMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start text-base h-12">
+                    <User className="mr-3 h-5 w-5" />
+                    Profile & Settings
+                  </Button>
+                </Link>
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-base h-12 text-destructive"
+                  onClick={() => {
+                    setInternalMenuOpen(false)
+                    router.push('/')
+                  }}
+                >
+                  <LogOut className="mr-3 h-5 w-5" />
+                  Logout
+                </Button>
+              </div>
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

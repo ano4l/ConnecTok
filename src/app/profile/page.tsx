@@ -97,7 +97,7 @@ export default function ProfilePage() {
         showSearch={false}
       />
 
-      <div className="container py-6">
+      <div className="container py-6 pb-20 md:pb-6">
         {/* Profile Header */}
         <Card className="mb-6">
           <CardContent className="pt-6">
@@ -308,22 +308,24 @@ export default function ProfilePage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {documents.map((doc, index) => (
-                    <div key={index}>
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <FileText className="h-8 w-8 text-muted-foreground" />
-                          <div>
-                            <p className="font-medium">{doc.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Uploaded: {doc.uploadDate} • Expires: {doc.expiryDate}
-                            </p>
+                    <div key={index} className="p-3 md:p-4 border rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <FileText className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <p className="font-medium text-sm md:text-base">{doc.name}</p>
+                            {getStatusBadge(doc.status)}
                           </div>
+                          <p className="text-xs md:text-sm text-muted-foreground">
+                            Uploaded: {doc.uploadDate}
+                          </p>
+                          <p className="text-xs md:text-sm text-muted-foreground">
+                            Expires: {doc.expiryDate}
+                          </p>
                         </div>
-                        {getStatusBadge(doc.status)}
                       </div>
-                      {index < documents.length - 1 && <Separator className="my-4" />}
                     </div>
                   ))}
                 </div>
@@ -344,23 +346,20 @@ export default function ProfilePage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {paymentMethods.map((method, index) => (
-                    <div key={index}>
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <CreditCard className="h-8 w-8 text-muted-foreground" />
-                          <div>
-                            <p className="font-medium">{method.type}</p>
-                            <p className="text-sm text-muted-foreground">{method.number}</p>
+                    <div key={index} className="p-3 md:p-4 border rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <CreditCard className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <p className="font-medium text-sm md:text-base">{method.type}</p>
+                            {method.default && <Badge className="text-xs">Default</Badge>}
+                            {getStatusBadge(method.status)}
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {method.default && <Badge>Default</Badge>}
-                          {getStatusBadge(method.status)}
+                          <p className="text-xs md:text-sm text-muted-foreground break-all">{method.number}</p>
                         </div>
                       </div>
-                      {index < paymentMethods.length - 1 && <Separator className="my-4" />}
                     </div>
                   ))}
                 </div>
