@@ -9,6 +9,9 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AppHeader } from '@/components/layout/app-header'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { 
   Plus, 
   Package,
@@ -57,6 +60,15 @@ interface StockItem {
 
 export default function SupplierDashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [expandedDelivery, setExpandedDelivery] = useState<string | null>(null)
+  const [addProductOpen, setAddProductOpen] = useState(false)
+  const [wizardStep, setWizardStep] = useState(1)
+  const [productName, setProductName] = useState('')
+  const [productCategory, setProductCategory] = useState('')
+  const [productPrice, setProductPrice] = useState('')
+  const [productStock, setProductStock] = useState('')
+  const [productUnit, setProductUnit] = useState('')
+  const [productDescription, setProductDescription] = useState('')
 
   const stats = [
     {
@@ -293,7 +305,7 @@ export default function SupplierDashboard() {
                 Manage your deliveries, stock, and income
               </p>
             </div>
-            <Button>
+            <Button onClick={() => setAddProductOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Product
             </Button>
@@ -345,13 +357,18 @@ export default function SupplierDashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     {deliveries.map((delivery) => (
-                      <div key={delivery.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-4">
+                      <div key={delivery.id} className="border rounded-lg">
+                        <div 
+                          className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-4 cursor-pointer hover:bg-accent/50 transition-colors"
+                          onClick={() => setExpandedDelivery(expandedDelivery === delivery.id ? null : delivery.id)}
+                        >
                         <div className="flex items-start gap-4">
                           <div className="h-12 w-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
                             <Truck className="h-6 w-6 text-muted-foreground" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
+                              <ChevronRight className={`h-4 w-4 transition-transform ${expandedDelivery === delivery.id ? 'rotate-90' : ''}`} />
                               <span className="font-medium">{delivery.id}</span>
                               <Badge variant={getDeliveryStatusColor(delivery.status)}>
                                 {delivery.status.replace('-', ' ')}
@@ -367,9 +384,29 @@ export default function SupplierDashboard() {
                         </div>
                         <div className="flex flex-col sm:items-end gap-2">
                           <p className="text-sm text-muted-foreground">
-                            Scheduled: {delivery.scheduledDate}
+                            {delivery.scheduledDate}
                           </p>
-                          <div className="flex gap-2">
+                        </div>
+                      </div>
+                      
+                      {/* Expanded Details */}
+                      {expandedDelivery === delivery.id && (
+                        <div className="p-4 border-t bg-muted/30 space-y-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Customer</p>
+                              <p className="text-sm font-medium">{delivery.customer}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Scheduled Date</p>
+                              <p className="text-sm font-medium">{delivery.scheduledDate}</p>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <p className="text-xs text-muted-foreground">Delivery Address</p>
+                              <p className="text-sm font-medium">{delivery.address}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 pt-2">
                             {delivery.status === 'pending' && (
                               <Button size="sm" onClick={() => updateDeliveryStatus(delivery.id, 'picked-up')}>
                                 Mark Picked Up
@@ -391,12 +428,15 @@ export default function SupplierDashboard() {
                                 Completed
                               </Badge>
                             )}
-                            <Button variant="outline" size="sm">
-                              <Phone className="h-3 w-3 mr-1" />
-                              Contact
+                            <Button variant="outline" size="sm" asChild>
+                              <Link href="/messages">
+                                <Phone className="h-3 w-3 mr-1" />
+                                Contact
+                              </Link>
                             </Button>
                           </div>
                         </div>
+                      )}
                       </div>
                     ))}
                   </div>
@@ -440,12 +480,12 @@ export default function SupplierDashboard() {
                             <p className="text-sm text-muted-foreground">{item.category}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-6">
-                          <div className="text-right">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6">
+                          <div className="text-left sm:text-right">
                             <p className="text-sm font-medium">${item.price}/{item.unit}</p>
                             <p className="text-xs text-muted-foreground">Price</p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-left sm:text-right">
                             <p className={`text-sm font-medium ${item.stock <= item.minStock ? 'text-destructive' : ''}`}>
                               {item.stock} {item.unit}
                             </p>
@@ -453,7 +493,7 @@ export default function SupplierDashboard() {
                               Min: {item.minStock} {item.unit}
                             </p>
                           </div>
-                          <div className="flex gap-1">
+                          <div className="flex gap-2 w-full sm:w-auto">
                             <Button variant="outline" size="sm">
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -630,6 +670,170 @@ export default function SupplierDashboard() {
           </Link>
         </div>
       </nav>
+
+      {/* Add Product Wizard Dialog */}
+      <Dialog open={addProductOpen} onOpenChange={(open) => {
+        setAddProductOpen(open)
+        if (!open) {
+          setWizardStep(1)
+          setProductName('')
+          setProductCategory('')
+          setProductPrice('')
+          setProductStock('')
+          setProductUnit('')
+          setProductDescription('')
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Product - Step {wizardStep} of 3</DialogTitle>
+            <DialogDescription>
+              {wizardStep === 1 && 'Enter basic product information'}
+              {wizardStep === 2 && 'Set pricing and inventory details'}
+              {wizardStep === 3 && 'Review and confirm product details'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Step 1: Basic Info */}
+            {wizardStep === 1 && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Product Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="e.g., Fresh Tomatoes"
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category</Label>
+                  <Input
+                    id="category"
+                    placeholder="e.g., Agriculture"
+                    value={productCategory}
+                    onChange={(e) => setProductCategory(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Product description..."
+                    value={productDescription}
+                    onChange={(e) => setProductDescription(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Step 2: Pricing & Inventory */}
+            {wizardStep === 2 && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="price">Price per Unit ($)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    placeholder="0.00"
+                    value={productPrice}
+                    onChange={(e) => setProductPrice(e.target.value)}
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="unit">Unit of Measurement</Label>
+                  <Input
+                    id="unit"
+                    placeholder="e.g., kg, bag, piece"
+                    value={productUnit}
+                    onChange={(e) => setProductUnit(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="stock">Initial Stock Quantity</Label>
+                  <Input
+                    id="stock"
+                    type="number"
+                    placeholder="0"
+                    value={productStock}
+                    onChange={(e) => setProductStock(e.target.value)}
+                    min="0"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Step 3: Review */}
+            {wizardStep === 3 && (
+              <div className="space-y-3">
+                <div className="rounded-lg border p-4 space-y-3">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Product Name</p>
+                    <p className="font-medium">{productName}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Category</p>
+                    <p className="font-medium">{productCategory}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Description</p>
+                    <p className="text-sm">{productDescription || 'No description'}</p>
+                  </div>
+                  <Separator />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Price</p>
+                      <p className="font-medium">${productPrice}/{productUnit}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Initial Stock</p>
+                      <p className="font-medium">{productStock} {productUnit}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            {wizardStep > 1 && (
+              <Button
+                variant="outline"
+                onClick={() => setWizardStep(wizardStep - 1)}
+              >
+                Back
+              </Button>
+            )}
+            {wizardStep < 3 ? (
+              <Button
+                onClick={() => setWizardStep(wizardStep + 1)}
+                disabled={wizardStep === 1 ? !productName || !productCategory : !productPrice || !productUnit || !productStock}
+              >
+                Next
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  setAddProductOpen(false)
+                  setWizardStep(1)
+                  setProductName('')
+                  setProductCategory('')
+                  setProductPrice('')
+                  setProductStock('')
+                  setProductUnit('')
+                  setProductDescription('')
+                }}
+              >
+                Add Product
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
