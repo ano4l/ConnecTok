@@ -7,6 +7,14 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { AppHeader } from '@/components/layout/app-header'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { 
   Truck,
   Package,
@@ -19,7 +27,10 @@ import {
   AlertTriangle,
   CheckCircle,
   ArrowLeft,
-  MoreVertical
+  MoreVertical,
+  Trash2,
+  ChevronRight,
+  Minus
 } from 'lucide-react'
 
 interface Product {
@@ -36,8 +47,12 @@ interface Product {
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filter, setFilter] = useState<string>('all')
-
-  const products: Product[] = [
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null)
+  const [expandedProduct, setExpandedProduct] = useState<string | null>(null)
+  const [products, setProducts] = useState<Product[]>([
     {
       id: 'PRD-001',
       name: 'Fresh Tomatoes',
@@ -98,7 +113,47 @@ export default function ProductsPage() {
       price: 1.80,
       status: 'in-stock'
     }
-  ]
+  ])
+
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct({ ...product })
+    setShowEditDialog(true)
+  }
+
+  const handleSaveProduct = () => {
+    if (editingProduct) {
+      setProducts(products.map(p => p.id === editingProduct.id ? editingProduct : p))
+      setShowEditDialog(false)
+      setEditingProduct(null)
+    }
+  }
+
+  const handleDeleteProduct = (product: Product) => {
+    setProductToDelete(product)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = () => {
+    if (productToDelete) {
+      setProducts(products.filter(p => p.id !== productToDelete.id))
+      setShowDeleteDialog(false)
+      setProductToDelete(null)
+    }
+  }
+
+  const handleStockAdjustment = (productId: string, adjustment: number) => {
+    setProducts(products.map(p => {
+      if (p.id === productId) {
+        const newStock = Math.max(0, p.stock + adjustment)
+        return {
+          ...p,
+          stock: newStock,
+          status: newStock === 0 ? 'out-of-stock' : newStock < p.minStock ? 'low-stock' : 'in-stock'
+        }
+      }
+      return p
+    }))
+  }
 
   const getStatusBadge = (status: Product['status']) => {
     switch (status) {
@@ -246,17 +301,78 @@ export default function ProductsPage() {
 
               {/* Action Buttons */}
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" className="flex-1">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => handleEditProduct(product)}
+                >
                   <Edit className="mr-2 h-4 w-4" />
                   Edit
                 </Button>
-                {(product.status === 'low-stock' || product.status === 'out-of-stock') && (
-                  <Button size="sm" className="flex-1">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Restock
-                  </Button>
-                )}
+                <Button 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => setExpandedProduct(expandedProduct === product.id ? null : product.id)}
+                >
+                  <ChevronRight className={`mr-2 h-4 w-4 transition-transform ${expandedProduct === product.id ? 'rotate-90' : ''}`} />
+                  Details
+                </Button>
               </div>
+
+              {/* Expanded Details */}
+              {expandedProduct === product.id && (
+                <div className="mt-3 pt-3 border-t space-y-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2">Stock Adjustment</p>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleStockAdjustment(product.id, -10)}
+                      >
+                        <Minus className="h-4 w-4 mr-1" />
+                        -10
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleStockAdjustment(product.id, -50)}
+                      >
+                        <Minus className="h-4 w-4 mr-1" />
+                        -50
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleStockAdjustment(product.id, 50)}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        +50
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleStockAdjustment(product.id, 100)}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        +100
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="destructive" 
+                      className="flex-1"
+                      onClick={() => handleDeleteProduct(product)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Product
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -287,6 +403,103 @@ export default function ProductsPage() {
           </Link>
         </div>
       </nav>
+
+      {/* Edit Product Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+            <DialogDescription>
+              Update product information and pricing
+            </DialogDescription>
+          </DialogHeader>
+          {editingProduct && (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Product Name</label>
+                <Input
+                  value={editingProduct.name}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                  placeholder="Product name"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Category</label>
+                <Input
+                  value={editingProduct.category}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
+                  placeholder="Category"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium">Price (${editingProduct.unit})</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editingProduct.price}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Unit</label>
+                  <Input
+                    value={editingProduct.unit}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, unit: e.target.value })}
+                    placeholder="kg, bag, etc"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium">Current Stock</label>
+                  <Input
+                    type="number"
+                    value={editingProduct.stock}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, stock: parseInt(e.target.value) })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Min Stock</label>
+                  <Input
+                    type="number"
+                    value={editingProduct.minStock}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, minStock: parseInt(e.target.value) })}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveProduct}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Product</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {productToDelete?.name}? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
