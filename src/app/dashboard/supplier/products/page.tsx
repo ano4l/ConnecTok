@@ -1,0 +1,281 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { AppHeader } from '@/components/layout/app-header'
+import { 
+  Truck,
+  Package,
+  Home,
+  DollarSign,
+  MessageSquare,
+  Plus,
+  Search,
+  Edit,
+  AlertTriangle,
+  CheckCircle,
+  ArrowLeft,
+  MoreVertical
+} from 'lucide-react'
+
+interface Product {
+  id: string
+  name: string
+  category: string
+  stock: number
+  minStock: number
+  unit: string
+  price: number
+  status: 'in-stock' | 'low-stock' | 'out-of-stock'
+}
+
+export default function ProductsPage() {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filter, setFilter] = useState<string>('all')
+
+  const products: Product[] = [
+    {
+      id: 'PRD-001',
+      name: 'Fresh Tomatoes',
+      category: 'Vegetables',
+      stock: 250,
+      minStock: 50,
+      unit: 'kg',
+      price: 2.50,
+      status: 'in-stock'
+    },
+    {
+      id: 'PRD-002',
+      name: 'Maize Flour',
+      category: 'Grains',
+      stock: 30,
+      minStock: 100,
+      unit: 'kg',
+      price: 1.80,
+      status: 'low-stock'
+    },
+    {
+      id: 'PRD-003',
+      name: 'Onions',
+      category: 'Vegetables',
+      stock: 180,
+      minStock: 40,
+      unit: 'kg',
+      price: 1.50,
+      status: 'in-stock'
+    },
+    {
+      id: 'PRD-004',
+      name: 'Potatoes',
+      category: 'Vegetables',
+      stock: 0,
+      minStock: 60,
+      unit: 'kg',
+      price: 2.00,
+      status: 'out-of-stock'
+    },
+    {
+      id: 'PRD-005',
+      name: 'Cabbage',
+      category: 'Vegetables',
+      stock: 15,
+      minStock: 30,
+      unit: 'heads',
+      price: 1.20,
+      status: 'low-stock'
+    },
+    {
+      id: 'PRD-006',
+      name: 'Carrots',
+      category: 'Vegetables',
+      stock: 120,
+      minStock: 25,
+      unit: 'kg',
+      price: 1.80,
+      status: 'in-stock'
+    }
+  ]
+
+  const getStatusBadge = (status: Product['status']) => {
+    switch (status) {
+      case 'in-stock':
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">In Stock</Badge>
+      case 'low-stock':
+        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Low Stock</Badge>
+      case 'out-of-stock':
+        return <Badge variant="destructive">Out of Stock</Badge>
+    }
+  }
+
+  const getStatusIcon = (status: Product['status']) => {
+    switch (status) {
+      case 'in-stock':
+        return <CheckCircle className="h-4 w-4 text-green-600" />
+      case 'low-stock':
+        return <AlertTriangle className="h-4 w-4 text-yellow-600" />
+      case 'out-of-stock':
+        return <AlertTriangle className="h-4 w-4 text-red-600" />
+    }
+  }
+
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesFilter = filter === 'all' || p.status === filter
+    return matchesSearch && matchesFilter
+  })
+
+  const statusCounts = {
+    all: products.length,
+    'in-stock': products.filter(p => p.status === 'in-stock').length,
+    'low-stock': products.filter(p => p.status === 'low-stock').length,
+    'out-of-stock': products.filter(p => p.status === 'out-of-stock').length
+  }
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      <AppHeader 
+        userRole="supplier" 
+        userName="Green Farms" 
+        userInitials="GF"
+        showSearch={false}
+      />
+
+      {/* Mobile Sub Header */}
+      <div className="sticky top-14 z-40 bg-background border-b">
+        <div className="container py-3">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Link href="/dashboard/supplier">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              </Link>
+              <h1 className="text-lg font-semibold">Products</h1>
+            </div>
+            <Button size="sm">
+              <Plus className="mr-2 h-4 w-4" />
+              Add
+            </Button>
+          </div>
+
+          {/* Search */}
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              className="pl-9 h-9"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          {/* Filter Pills */}
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
+            {[
+              { key: 'all', label: 'All', count: statusCounts.all },
+              { key: 'in-stock', label: 'In Stock', count: statusCounts['in-stock'] },
+              { key: 'low-stock', label: 'Low Stock', count: statusCounts['low-stock'] },
+              { key: 'out-of-stock', label: 'Out', count: statusCounts['out-of-stock'] }
+            ].map((item) => (
+              <Button
+                key={item.key}
+                variant={filter === item.key ? 'default' : 'outline'}
+                size="sm"
+                className="rounded-full whitespace-nowrap"
+                onClick={() => setFilter(item.key)}
+              >
+                {item.label}
+                <span className="ml-1.5 text-xs opacity-70">({item.count})</span>
+              </Button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Products List */}
+      <div className="container py-4 space-y-3">
+        {filteredProducts.map((product) => (
+          <Card key={product.id} className="overflow-hidden">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                    <Package className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{product.name}</p>
+                    <p className="text-sm text-muted-foreground">{product.category}</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-between py-3 border-t border-b my-3">
+                <div className="text-center flex-1">
+                  <p className="text-lg font-semibold">{product.stock}</p>
+                  <p className="text-xs text-muted-foreground">{product.unit} in stock</p>
+                </div>
+                <div className="text-center flex-1 border-l">
+                  <p className="text-lg font-semibold">${product.price.toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground">per {product.unit}</p>
+                </div>
+                <div className="text-center flex-1 border-l">
+                  <div className="flex justify-center">{getStatusIcon(product.status)}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {product.status === 'in-stock' ? 'Good' : product.status === 'low-stock' ? 'Restock' : 'Empty'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" className="flex-1">
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+                {(product.status === 'low-stock' || product.status === 'out-of-stock') && (
+                  <Button size="sm" className="flex-1">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Restock
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t safe-area-pb">
+        <div className="grid grid-cols-5 h-16">
+          <Link href="/dashboard/supplier" className="flex flex-col items-center justify-center gap-1 text-muted-foreground">
+            <Home className="h-5 w-5" />
+            <span className="text-xs">Home</span>
+          </Link>
+          <Link href="/dashboard/supplier/deliveries" className="flex flex-col items-center justify-center gap-1 text-muted-foreground">
+            <Truck className="h-5 w-5" />
+            <span className="text-xs">Deliveries</span>
+          </Link>
+          <Link href="/dashboard/supplier/products" className="flex flex-col items-center justify-center gap-1 text-primary">
+            <Package className="h-5 w-5" />
+            <span className="text-xs font-medium">Products</span>
+          </Link>
+          <Link href="/dashboard/supplier/income" className="flex flex-col items-center justify-center gap-1 text-muted-foreground">
+            <DollarSign className="h-5 w-5" />
+            <span className="text-xs">Income</span>
+          </Link>
+          <Link href="/messages" className="flex flex-col items-center justify-center gap-1 text-muted-foreground">
+            <MessageSquare className="h-5 w-5" />
+            <span className="text-xs">Messages</span>
+          </Link>
+        </div>
+      </nav>
+    </div>
+  )
+}
