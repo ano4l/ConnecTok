@@ -541,19 +541,19 @@ export default function SupplierDashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     {incomeData.map((data, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <span className="w-12 text-sm font-medium">{data.month}</span>
-                          <div className="flex-1 h-4 bg-muted rounded-full overflow-hidden w-48">
-                            <div 
-                              className="h-full bg-primary rounded-full"
-                              style={{ width: `${(data.income / 15000) * 100}%` }}
-                            />
+                      <div key={index} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{data.month}</span>
+                          <div className="text-right">
+                            <p className="font-semibold">${data.income.toLocaleString()}</p>
+                            <p className="text-xs text-muted-foreground">{data.orders} orders</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-medium">${data.income.toLocaleString()}</p>
-                          <p className="text-xs text-muted-foreground">{data.orders} orders</p>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-primary rounded-full transition-all"
+                            style={{ width: `${(data.income / 15000) * 100}%` }}
+                          />
                         </div>
                       </div>
                     ))}

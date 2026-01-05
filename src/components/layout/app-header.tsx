@@ -169,20 +169,20 @@ export function AppHeader({
             </Button>
 
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 rounded-md border bg-popover p-0 shadow-lg">
+              <div className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg border bg-popover shadow-lg z-50">
                 <div className="p-4 border-b">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold">Notifications</h3>
-                    <Button variant="ghost" size="sm" className="text-xs">
+                    <Button variant="ghost" size="sm" className="text-xs h-7">
                       Mark all read
                     </Button>
                   </div>
                 </div>
-                <div className="max-h-80 overflow-y-auto">
+                <div className="max-h-[60vh] overflow-y-auto">
                   {notifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className={`p-4 border-b last:border-b-0 hover:bg-accent cursor-pointer ${
+                      className={`p-4 border-b last:border-b-0 hover:bg-accent cursor-pointer transition-colors ${
                         !notification.read ? 'bg-accent/50' : ''
                       }`}
                     >
@@ -191,8 +191,8 @@ export function AppHeader({
                           {getNotificationIcon(notification.type)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium">{notification.title}</p>
-                          <p className="text-xs text-muted-foreground truncate">
+                          <p className="text-sm font-medium leading-tight">{notification.title}</p>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                             {notification.message}
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
@@ -209,7 +209,7 @@ export function AppHeader({
                   ))}
                 </div>
                 <div className="p-2 border-t">
-                  <Button variant="ghost" className="w-full" size="sm">
+                  <Button variant="ghost" className="w-full text-sm" size="sm">
                     View all notifications
                   </Button>
                 </div>

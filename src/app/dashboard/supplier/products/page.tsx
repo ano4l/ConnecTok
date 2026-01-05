@@ -216,20 +216,31 @@ export default function ProductsPage() {
                 </Button>
               </div>
 
-              <div className="flex items-center justify-between py-3 border-t border-b my-3">
-                <div className="text-center flex-1">
-                  <p className="text-lg font-semibold">{product.stock}</p>
-                  <p className="text-xs text-muted-foreground">{product.unit} in stock</p>
+              <div className="space-y-3 py-3 border-t border-b my-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Stock Level</p>
+                    <p className="text-xl font-bold">{product.stock} <span className="text-sm font-normal text-muted-foreground">{product.unit}</span></p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">Price per {product.unit}</p>
+                    <p className="text-xl font-bold">${product.price.toFixed(2)}</p>
+                  </div>
                 </div>
-                <div className="text-center flex-1 border-l">
-                  <p className="text-lg font-semibold">${product.price.toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground">per {product.unit}</p>
-                </div>
-                <div className="text-center flex-1 border-l">
-                  <div className="flex justify-center">{getStatusIcon(product.status)}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {product.status === 'in-stock' ? 'Good' : product.status === 'low-stock' ? 'Restock' : 'Empty'}
-                  </p>
+                <div className="flex items-center gap-2">
+                  {getStatusIcon(product.status)}
+                  <div className="flex-1">
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all ${
+                          product.status === 'in-stock' ? 'bg-green-500' : 
+                          product.status === 'low-stock' ? 'bg-yellow-500' : 'bg-red-500'
+                        }`}
+                        style={{ width: `${Math.min((product.stock / product.minStock) * 100, 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Min: {product.minStock} {product.unit}</p>
+                  </div>
                 </div>
               </div>
 
