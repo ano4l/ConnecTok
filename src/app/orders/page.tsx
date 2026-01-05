@@ -308,6 +308,32 @@ export default function OrdersPage() {
           </div>
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t md:hidden">
+        <div className="grid grid-cols-5 h-16">
+          <Link href="/dashboard/buyer" className="flex flex-col items-center justify-center gap-1 text-muted-foreground">
+            <Home className="h-5 w-5" />
+            <span className="text-xs">Home</span>
+          </Link>
+          <Link href="/explore" className="flex flex-col items-center justify-center gap-1 text-muted-foreground">
+            <Search className="h-5 w-5" />
+            <span className="text-xs">Explore</span>
+          </Link>
+          <Link href="/orders" className="flex flex-col items-center justify-center gap-1 text-primary">
+            <ShoppingCart className="h-5 w-5" />
+            <span className="text-xs font-medium">Orders</span>
+          </Link>
+          <Link href="/saved" className="flex flex-col items-center justify-center gap-1 text-muted-foreground">
+            <Heart className="h-5 w-5" />
+            <span className="text-xs">Saved</span>
+          </Link>
+          <Link href="/messages" className="flex flex-col items-center justify-center gap-1 text-muted-foreground">
+            <MessageSquare className="h-5 w-5" />
+            <span className="text-xs">Messages</span>
+          </Link>
+        </div>
+      </nav>
     </div>
   )
 }

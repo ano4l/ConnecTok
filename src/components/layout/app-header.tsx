@@ -280,7 +280,7 @@ export function AppHeader({
 
       {/* Mobile Menu Overlay */}
       {(internalMenuOpen || mobileMenuOpen) && (
-        <div className="fixed inset-0 top-14 bg-background z-40 md:hidden">
+        <div className="fixed inset-0 top-14 bg-background/95 backdrop-blur-sm z-40 md:hidden border-t">
           <div className="container py-4">
             <nav className="space-y-2">
               {userRole === 'buyer' ? (
